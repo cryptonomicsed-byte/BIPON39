@@ -60,4 +60,9 @@ pub enum BiponError {
     /// The operating system random number generator failed.
     #[error("Random generation error: {0}")]
     RandomGenerationError(String),
+
+    /// Seed bytes were too short for the requested operation (need at least 32 bytes; path
+    /// derivation requires 64).
+    #[error("Invalid seed length: {0} bytes")]
+    InvalidSeedLength(usize),
 }
