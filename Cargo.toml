@@ -9,6 +9,10 @@ readme      = "README.md"
 keywords    = ["mnemonic", "bip39", "base256", "yoruba", "crypto"]
 categories  = ["cryptography", "encoding"]
 
+[[bin]]
+name = "bipon39"
+path = "src/bin/cli.rs"
+
 [dependencies]
 sha2                  = "0.10"
 hmac                  = "0.12"
@@ -25,11 +29,8 @@ once_cell             = "1.19"
 clap                  = { version = "4.6", features = ["derive"] }
 getrandom             = "0.2"
 ed25519-dalek         = { version = "2", features = ["rand_core"] }
+bs58                  = "0.5"
 
 [dev-dependencies]
 criterion   = { version = "0.5", features = ["html_reports"] }
-hex-literal = "0.4"
 
-[[bench]]
-name    = "throughput"
-harness = false
