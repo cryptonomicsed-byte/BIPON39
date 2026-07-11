@@ -70,8 +70,8 @@ pub fn derive_child_key(
     parent_chain_code: &[u8; 32],
     index: u32,
 ) -> ([u8; 32], [u8; 32]) {
-    let mut mac = Hmac::<Sha512>::new_from_slice(parent_chain_code)
-        .expect("HMAC accepts any key length");
+    let mut mac =
+        Hmac::<Sha512>::new_from_slice(parent_chain_code).expect("HMAC accepts any key length");
 
     if index >= 0x8000_0000 {
         // Hardened: 0x00 || parent_key || index_be

@@ -20,7 +20,7 @@ fn mnemonic_to_seed_256(c: &mut Criterion) {
 
 fn wordlist_merkle_root(c: &mut Criterion) {
     c.bench_function("compute_wordlist_merkle_root", |b| {
-        b.iter(|| compute_wordlist_merkle_root())
+        b.iter(compute_wordlist_merkle_root)
     });
 }
 

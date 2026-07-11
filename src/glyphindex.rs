@@ -130,12 +130,7 @@ impl GlyphKeyring {
     ) -> Result<Self, BiponError> {
         let salt = [b"GIX1".as_slice(), owner.as_bytes()].concat();
         let mut seed = [0u8; 64];
-        pbkdf2::pbkdf2_hmac::<Sha256>(
-            passphrase.as_bytes(),
-            &salt,
-            PBKDF2_ITERATIONS,
-            &mut seed,
-        );
+        pbkdf2::pbkdf2_hmac::<Sha256>(passphrase.as_bytes(), &salt, PBKDF2_ITERATIONS, &mut seed);
         let keyring = Self::from_seed(&seed, owner, purpose, duress);
         seed.zeroize();
         keyring
@@ -192,8 +187,16 @@ mod tests {
         for (text, cid, codepoint, base, composed) in FOLD_VECTORS {
             let digest = content_hash(text);
             assert_eq!(hex::encode(digest), *cid, "hash mismatch for {text}");
-            assert_eq!(glyph_fold(&digest) as u32, *codepoint, "fold mismatch for {text}");
-            assert_eq!(odu_link(&digest), (*base, *composed), "odu mismatch for {text}");
+            assert_eq!(
+                glyph_fold(&digest) as u32,
+                *codepoint,
+                "fold mismatch for {text}"
+            );
+            assert_eq!(
+                odu_link(&digest),
+                (*base, *composed),
+                "odu mismatch for {text}"
+            );
         }
     }
 

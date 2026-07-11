@@ -27,7 +27,7 @@ fn odu_index_deterministic() {
 #[test]
 fn odu_xor_correctness() {
     let words = ["esu-elegbara", "sango", "osun"];
-    assert_eq!(odu_primary_index(&words).unwrap(), 0 ^ 88 ^ 108);
+    assert_eq!(odu_primary_index(&words).unwrap(), 88 ^ 108);
 }
 
 #[test]

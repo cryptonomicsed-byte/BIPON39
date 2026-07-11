@@ -10,7 +10,11 @@ use bipon39::{
 };
 
 #[derive(Parser)]
-#[command(name = "bipon39", version = "0.1.0", about = "BIPỌ̀N39 CLI — identity + wallet")]
+#[command(
+    name = "bipon39",
+    version = "0.1.0",
+    about = "BIPỌ̀N39 CLI — identity + wallet"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -51,14 +55,18 @@ enum Commands {
 }
 
 fn read_mnemonic(
-    mnemonic: Option<Vec<String>>, use_stdin: bool,
+    mnemonic: Option<Vec<String>>,
+    use_stdin: bool,
 ) -> Result<Vec<String>, BiponError> {
     if use_stdin {
         let mut input = String::new();
-        std::io::stdin().read_to_string(&mut input).map_err(|e| {
-            BiponError::InvalidWord { position: 0, word: format!("stdin error: {}", e) }
-        })?;
-        Ok(input.trim().split_whitespace().map(String::from).collect())
+        std::io::stdin()
+            .read_to_string(&mut input)
+            .map_err(|e| BiponError::InvalidWord {
+                position: 0,
+                word: format!("stdin error: {}", e),
+            })?;
+        Ok(input.split_whitespace().map(String::from).collect())
     } else {
         Ok(mnemonic.unwrap_or_default())
     }
@@ -67,8 +75,9 @@ fn read_mnemonic(
 fn get_entropy(bits: usize) -> Result<Vec<u8>, BiponError> {
     let bytes = bits / 8;
     let mut entropy = vec![0u8; bytes];
-    getrandom(&mut entropy).map_err(|e| {
-        BiponError::InvalidWord { position: 0, word: format!("getrandom: {}", e) }
+    getrandom(&mut entropy).map_err(|e| BiponError::InvalidWord {
+        position: 0,
+        word: format!("getrandom: {}", e),
     })?;
     Ok(entropy)
 }
@@ -76,7 +85,10 @@ fn get_entropy(bits: usize) -> Result<Vec<u8>, BiponError> {
 fn build_output(words: &[&str], seed: &[u8]) -> Value {
     let (sk, vk) = ed25519_keypair_from_seed(seed).unwrap_or_else(|_| {
         use ed25519_dalek::{SigningKey, VerifyingKey};
-        (SigningKey::from_bytes(&[0u8; 32]), VerifyingKey::from_bytes(&[0u8; 32]).unwrap())
+        (
+            SigningKey::from_bytes(&[0u8; 32]),
+            VerifyingKey::from_bytes(&[0u8; 32]).unwrap(),
+        )
     });
 
     let odu = odu_primary_index(words).ok();
@@ -110,7 +122,7 @@ fn build_output(words: &[&str], seed: &[u8]) -> Value {
             "bip44": {
                 "solana": {
                     "path": "m/44'/501'/0'/0/0",
-                    "private_key_hex": sol_key.clone().map(|(k,_)| hex::encode(k)).unwrap_or_default(),
+                    "private_key_hex": sol_key.map(|(k,_)| hex::encode(k)).unwrap_or_default(),
                 },
                 "ethereum": {
                     "path": "m/44'/60'/0'/0/0",
@@ -140,13 +152,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let words = entropy_to_mnemonic(&entropy)?;
             let word_refs: Vec<&str> = words.iter().map(String::as_str).collect();
             let seed = mnemonic_to_seed(&word_refs, &passphrase)?;
-            println!("{}", serde_json::to_string_pretty(&build_output(&word_refs, &seed))?);
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&build_output(&word_refs, &seed))?
+            );
         }
-        Commands::Derive { mnemonic, stdin, passphrase } => {
+        Commands::Derive {
+            mnemonic,
+            stdin,
+            passphrase,
+        } => {
             let words = read_mnemonic(mnemonic, stdin)?;
             let word_refs: Vec<&str> = words.iter().map(String::as_str).collect();
             let seed = mnemonic_to_seed(&word_refs, &passphrase)?;
-            println!("{}", serde_json::to_string_pretty(&build_output(&word_refs, &seed))?);
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&build_output(&word_refs, &seed))?
+            );
         }
         Commands::Info { mnemonic, stdin } => {
             let words = read_mnemonic(mnemonic, stdin)?;
@@ -163,18 +185,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 macro_counts.push(json!({"macro": m.name(), "count": c}));
             }
 
-            println!("{}", serde_json::to_string_pretty(&json!({
-                "word_count": words.len(),
-                "entropy_hex": hex::encode(&*entropy),
-                "seed_hex": hex::encode(&*seed),
-                "odu_primary_index": odu,
-                "dominant_macro": dominant.name(),
-                "macro_distribution": macro_counts,
-                "elemental_signature": {
-                    "fire": elements.fire, "water": elements.water,
-                    "earth": elements.earth, "air": elements.air,
-                },
-            }))?);
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&json!({
+                    "word_count": words.len(),
+                    "entropy_hex": hex::encode(&*entropy),
+                    "seed_hex": hex::encode(&*seed),
+                    "odu_primary_index": odu,
+                    "dominant_macro": dominant.name(),
+                    "macro_distribution": macro_counts,
+                    "elemental_signature": {
+                        "fire": elements.fire, "water": elements.water,
+                        "earth": elements.earth, "air": elements.air,
+                    },
+                }))?
+            );
         }
     }
     Ok(())
