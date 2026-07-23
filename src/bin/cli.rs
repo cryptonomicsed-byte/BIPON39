@@ -66,7 +66,7 @@ fn read_mnemonic(
                 position: 0,
                 word: format!("stdin error: {}", e),
             })?;
-        Ok(input.trim().split_whitespace().map(String::from).collect())
+        Ok(input.split_whitespace().map(String::from).collect())
     } else {
         Ok(mnemonic.unwrap_or_default())
     }
@@ -122,7 +122,7 @@ fn build_output(words: &[&str], seed: &[u8]) -> Value {
             "bip44": {
                 "solana": {
                     "path": "m/44'/501'/0'/0/0",
-                    "private_key_hex": sol_key.clone().map(|(k,_)| hex::encode(k)).unwrap_or_default(),
+                    "private_key_hex": sol_key.map(|(k,_)| hex::encode(k)).unwrap_or_default(),
                 },
                 "ethereum": {
                     "path": "m/44'/60'/0'/0/0",

@@ -35,7 +35,10 @@ pub use dualmode::{
     decode_2048, encode_2048, entropy_to_mnemonic_2048, mnemonic_2048_to_entropy, SUBTONES,
 };
 pub use error::BiponError;
-pub use glyphindex::{GlyphKeyring, GIX_DEFAULT_PURPOSE, GIX_HKDF_SALT, GIX_PBKDF2_ITERATIONS};
+pub use glyphindex::{
+    content_hash, glyph_fold, odu_link, GlyphKeyring, GIX_DEFAULT_PURPOSE, GIX_HKDF_SALT,
+    GIX_PBKDF2_ITERATIONS,
+};
 pub use identity::{ed25519_keypair_from_seed, public_key_hex};
 pub use ifascript::{
     dominant_macro, elemental_signature, entries_for, macro_distribution, odu_primary_index,
