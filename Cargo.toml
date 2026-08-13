@@ -30,6 +30,7 @@ clap                  = { version = "4.6", features = ["derive"] }
 getrandom             = "0.2"
 ed25519-dalek         = { version = "2", features = ["rand_core"] }
 bs58                  = "0.5"
+k256 = { version = "0.14.0", features = ["ecdsa"] }
 
 [dev-dependencies]
 criterion   = { version = "0.5", features = ["html_reports"] }
