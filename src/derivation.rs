@@ -258,4 +258,86 @@ mod bip32_compliance_tests {
         assert_eq!(key, hex32(M0H12H_KEY));
         assert_eq!(chain, hex32(M0H12H_CHAIN));
     }
+
+    // m/0'/1/2'/2 -> m/0'/1/2'/2/1000000000: two NON-hardened steps back to
+    // back (index 2, then index 1000000000). Vector 1's only consecutive
+    // same-type pair. Exists specifically to catch state-carry bugs across
+    // repeated non-hardened steps -- distinct risk from a single isolated
+    // non-hardened step, since it proves the compressed-pubkey branch's
+    // output threads correctly as *input* to another compressed-pubkey
+    // derivation, not just as input to a hardened one.
+    const M0H12H2_CHAIN: &str = "cfb71883f01676f587d023cc53a35bc7f88f724b1f8c2892ac1275ac822a3edd";
+    const M0H12H2_KEY: &str = "0f479245fb19a38a1954c5c7c0ebab2f9bdfd96a17563ef28a6a4b1a2a764ef4";
+    const M0H12H2_1B_CHAIN: &str = "c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e";
+    const M0H12H2_1B_KEY: &str = "471b76e389e528d6de6d816857e012c5455051cad6660850e58372a6c3e6e7c8";
+
+    #[test]
+    fn consecutive_nonhardened_steps_match_official_vector() {
+        let (key, chain) =
+            derive_child_key(&hex32(M0H12H2_KEY), &hex32(M0H12H2_CHAIN), 1_000_000_000).unwrap();
+        assert_eq!(key, hex32(M0H12H2_1B_KEY), "m/0'/1/2'/2/1000000000 private key mismatch");
+        assert_eq!(chain, hex32(M0H12H2_1B_CHAIN), "m/0'/1/2'/2/1000000000 chain code mismatch");
+    }
+
+    #[test]
+    fn full_five_step_path_matches_official_vector_incl_consecutive_nonhardened() {
+        // derive_path itself requires a >=64-byte seed (BIPON39's own
+        // convention); starts from the already-vector-verified master
+        // pair instead, same rationale as the H-N-H chain test above.
+        let mut key = hex32(M_KEY);
+        let mut chain = hex32(M_CHAIN);
+        for &index in &[0x8000_0000u32, 1, 0x8000_0002, 2, 1_000_000_000] {
+            (key, chain) = derive_child_key(&key, &chain, index).unwrap();
+        }
+        assert_eq!(key, hex32(M0H12H2_1B_KEY));
+        assert_eq!(chain, hex32(M0H12H2_1B_CHAIN));
+    }
+
+    /// The exact NIP-06 index shape (m/44'/1237'/<account>'/0/0): three
+    /// hardened segments followed by two non-hardened. No published
+    /// BIP-32 test vector anywhere contains three consecutive hardened
+    /// steps (checked all 5 vectors in the BIP-32 spec directly), so this
+    /// cannot be checked against an external reference value the way the
+    /// tests above are. What it DOES prove: derive_path's loop produces
+    /// byte-identical output to manually chaining derive_child_key one
+    /// step at a time for this exact index sequence -- i.e. no off-by-one,
+    /// no wrong-index-consumed, no state dropped between steps, for the
+    /// precise shape NIP-06 derivation will actually use. Combined with
+    /// the code-structural argument that derive_child_key has no hidden
+    /// state or mode flag depending on how its *parent* key was derived
+    /// (its only branch is on the current step's own index), a run of
+    /// three hardened steps exercises the identical code path as a single
+    /// hardened step, three times, with no logically distinct "H-after-H"
+    /// case to separately verify -- unlike the H<->N transitions and N-N
+    /// run above, which DO have vector coverage.
+    #[test]
+    fn nip06_shaped_path_matches_manual_step_by_step_chaining() {
+        // derive_path needs a >=64-byte seed (BIPON39's own PBKDF2
+        // convention); pad the 16-byte official seed to 64 bytes so
+        // derive_path's own internal master derivation runs on the exact
+        // same effective seed value as the manual chain below (both take
+        // the first 32 bytes as key / next 32 as chain code -- padding
+        // with zeros keeps that identical between the two paths, since
+        // this test is checking derive_path's LOOP logic against manual
+        // chaining, not re-deriving a real master key).
+        let mut seed = hex::decode(SEED_HEX).unwrap();
+        seed.resize(64, 0);
+        let path = [
+            44 | 0x8000_0000,
+            1237 | 0x8000_0000,
+            0 | 0x8000_0000, // account' = 0
+            0,                // change
+            0,                // index
+        ];
+
+        let via_derive_path = derive_path(&seed, &path).unwrap();
+
+        let mut key: [u8; 32] = seed[..32].try_into().unwrap();
+        let mut chain: [u8; 32] = seed[32..64].try_into().unwrap();
+        for &index in &path {
+            (key, chain) = derive_child_key(&key, &chain, index).unwrap();
+        }
+
+        assert_eq!(via_derive_path, (key, chain));
+    }
 }
