@@ -311,6 +311,31 @@ mod bip32_compliance_tests {
     /// case to separately verify -- unlike the H<->N transitions and N-N
     /// run above, which DO have vector coverage.
     #[test]
+    fn differential_check_against_independent_bip32_library_m_0h_0h_0h() {
+        // Requested by wM before signing off on the structural argument
+        // alone: an independent, well-established BIP-32 implementation
+        // (Python 'bip32' package by darosior) derived m/0'/0'/0' from
+        // Test Vector 1's seed (000102030405060708090a0b0c0d0e0f)
+        // end-to-end and its xpriv was decoded to raw hex externally --
+        // not reasoned from this crate's own code structure. This is the
+        // actual ground-truth check for three consecutive hardened steps
+        // that no published BIP-32 test vector covers.
+        const IND_CHAIN: &str = "f181f76b53c889d22d585c9c9118f8f58eee8148a0545b4af178466a09c3aff5";
+        const IND_KEY: &str = "fe5ba2e46bc5efeced527368a108b7eec60cd6a9d33608b7deaefc6cb3557db4";
+
+        let seed = hex::decode(SEED_HEX).unwrap();
+        let digest = crate::crypto::hmac_sha512(MASTER_KEY_BIP32.as_bytes(), &seed);
+        let mut key: [u8; 32] = digest[..32].try_into().unwrap();
+        let mut chain: [u8; 32] = digest[32..].try_into().unwrap();
+        for &index in &[0x8000_0000u32, 0x8000_0000, 0x8000_0000] {
+            (key, chain) = derive_child_key(&key, &chain, index).unwrap();
+        }
+
+        assert_eq!(key, hex32(IND_KEY), "m/0'/0'/0' key mismatch vs independent bip32 library");
+        assert_eq!(chain, hex32(IND_CHAIN), "m/0'/0'/0' chain code mismatch vs independent bip32 library");
+    }
+
+    #[test]
     fn nip06_shaped_path_matches_manual_step_by_step_chaining() {
         // derive_path needs a >=64-byte seed (BIPON39's own PBKDF2
         // convention); pad the 16-byte official seed to 64 bytes so
