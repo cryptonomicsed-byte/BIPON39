@@ -10,11 +10,11 @@ fn main() -> Result<(), BiponError> {
     let dominant = dominant_macro(&words)?;
     let distribution = macro_distribution(&words)?;
 
-    println!("Odù primary index: {odu}");
-    println!("Dominant macro: {}", dominant.name());
+    println!("Signature primary index: {odu}");
+    println!("Dominant domain: {}", dominant.universal_name());
     println!("Distribution:");
     for (macro_, count) in distribution.counts {
-        println!("  {}: {count}", macro_.name());
+        println!("  {}: {count}", macro_.universal_name());
     }
 
     Ok(())

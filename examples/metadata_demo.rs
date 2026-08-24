@@ -22,10 +22,10 @@ fn main() -> Result<(), BiponError> {
     );
 
     let profile = personality_profile(&phrase)?;
-    println!("Dominant Orisha: {}", profile.dominant_orisha.name());
-    println!("Macro distribution:");
+    println!("Dominant Domain: {}", profile.dominant_domain.universal_name());
+    println!("Domain distribution:");
     for (macro_, count) in profile.macro_distribution.counts {
-        println!("  {}: {count}", macro_.name());
+        println!("  {}: {count}", macro_.universal_name());
     }
 
     Ok(())

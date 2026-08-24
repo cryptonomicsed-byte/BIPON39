@@ -104,7 +104,7 @@ fn build_output(words: &[&str], seed: &[u8]) -> Value {
     let mut macro_counts = Vec::new();
     if let Some(d) = distribution {
         for (m, c) in d.counts {
-            macro_counts.push(json!({"macro": m.name(), "count": c}));
+            macro_counts.push(json!({"domain": m.universal_name(), "count": c}));
         }
     }
 
@@ -131,9 +131,9 @@ fn build_output(words: &[&str], seed: &[u8]) -> Value {
             }
         },
         "ifascript": {
-            "odu_primary_index": odu,
-            "dominant_macro": dominant.map(|m| m.name().to_string()),
-            "macro_distribution": macro_counts,
+            "signature_primary_index": odu,
+            "dominant_domain": dominant.map(|m| m.universal_name().to_string()),
+            "domain_distribution": macro_counts,
             "elemental_signature": {
                 "fire": elements.fire,
                 "water": elements.water,
@@ -182,7 +182,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let mut macro_counts = Vec::new();
             for (m, c) in distribution.counts {
-                macro_counts.push(json!({"macro": m.name(), "count": c}));
+                macro_counts.push(json!({"domain": m.universal_name(), "count": c}));
             }
 
             println!(
@@ -191,9 +191,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "word_count": words.len(),
                     "entropy_hex": hex::encode(&*entropy),
                     "seed_hex": hex::encode(&*seed),
-                    "odu_primary_index": odu,
-                    "dominant_macro": dominant.name(),
-                    "macro_distribution": macro_counts,
+                    "signature_primary_index": odu,
+                    "dominant_domain": dominant.universal_name(),
+                    "domain_distribution": macro_counts,
                     "elemental_signature": {
                         "fire": elements.fire, "water": elements.water,
                         "earth": elements.earth, "air": elements.air,

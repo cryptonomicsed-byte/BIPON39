@@ -98,16 +98,16 @@ fn elemental_signature_counts_metadata_elements() {
 }
 
 #[test]
-fn personality_profile_combines_macro_elements_and_dominant_orisha() {
+fn personality_profile_combines_macro_elements_and_dominant_domain() {
     let profile = personality_profile("esu-elegbara esu-elegba sango").unwrap();
     assert_eq!(profile.macro_distribution.total, 3);
     assert!((profile.macro_percentages[0].1 - (100.0 * 2.0 / 3.0)).abs() < 1e-10);
-    assert_eq!(profile.dominant_orisha, Macro::Esu);
+    assert_eq!(profile.dominant_domain, Macro::Esu);
     assert_eq!(
         profile.ritual_suggestions,
         vec!["draw crossroads", "clap thunder", "mark footprints"]
     );
-    assert!(profile.personality_summary.contains("ÈṢÙ leads"));
+    assert!(profile.personality_summary.contains("Access leads"));
     assert_eq!(
         profile.elemental_signature,
         ElementalVector {

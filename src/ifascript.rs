@@ -24,7 +24,8 @@ pub enum Macro {
 }
 
 impl Macro {
-    /// Canonical display name.
+    /// Canonical internal display name (Yorùbá anchor). Never surface this at
+    /// a public/user-facing boundary — use [`Macro::universal_name`] there.
     pub fn name(&self) -> &'static str {
         match self {
             Macro::Esu => "ÈṢÙ",
@@ -34,6 +35,21 @@ impl Macro {
             Macro::Oya => "ỌYA",
             Macro::Ogun => "ÒGÚN",
             Macro::Obatala => "ỌBÀTÁLÁ",
+        }
+    }
+
+    /// Public-facing name — universal wording per OSOVM_CODEX §42. Use this
+    /// (not [`Macro::name`]) for any CLI output, JSON API field, or other
+    /// surface a caller/user can see.
+    pub fn universal_name(&self) -> &'static str {
+        match self {
+            Macro::Esu => "Access",
+            Macro::Sango => "Score",
+            Macro::Osun => "History",
+            Macro::Yemoja => "Spawn",
+            Macro::Oya => "Sync",
+            Macro::Ogun => "Run",
+            Macro::Obatala => "Policy",
         }
     }
 
@@ -138,7 +154,7 @@ pub struct PersonalityProfile {
     /// Count of words across Fire, Water, Earth, Air, and Ether metadata.
     pub elemental_signature: ElementalVector,
     /// Dominant Macro/Orisha after deterministic tie-breaking.
-    pub dominant_orisha: Macro,
+    pub dominant_domain: Macro,
     /// Ordered, deduplicated ritual cues suggested by the mnemonic tokens.
     pub ritual_suggestions: Vec<String>,
     /// Short human-readable personality summary suitable for CLI/UI display.
@@ -206,10 +222,10 @@ pub fn personality_profile(mnemonic: &str) -> Result<PersonalityProfile, BiponEr
     let macro_distribution = macro_distribution(&words)?;
     let macro_percentages = macro_percentages(&macro_distribution);
     let elemental_signature = elemental_signature_for_words(&words)?;
-    let dominant_orisha = dominant_macro_from_distribution(&macro_distribution);
+    let dominant_domain = dominant_macro_from_distribution(&macro_distribution);
     let ritual_suggestions = ritual_cue_for(mnemonic)?;
     let personality_summary = build_personality_summary(
-        dominant_orisha,
+        dominant_domain,
         &elemental_signature,
         ritual_suggestions.first(),
     );
@@ -218,7 +234,7 @@ pub fn personality_profile(mnemonic: &str) -> Result<PersonalityProfile, BiponEr
         macro_distribution,
         macro_percentages,
         elemental_signature,
-        dominant_orisha,
+        dominant_domain,
         ritual_suggestions,
         personality_summary,
     })
@@ -258,7 +274,7 @@ fn macro_percentages(distribution: &MacroDistribution) -> [(Macro, f64); 7] {
 }
 
 fn build_personality_summary(
-    dominant_orisha: Macro,
+    dominant_domain: Macro,
     elements: &ElementalVector,
     first_ritual: Option<&String>,
 ) -> String {
@@ -266,11 +282,11 @@ fn build_personality_summary(
     match first_ritual {
         Some(cue) => format!(
             "{} leads with a {element} elemental tone; begin with \"{cue}\".",
-            dominant_orisha.name()
+            dominant_domain.universal_name()
         ),
         None => format!(
             "{} leads with a {element} elemental tone.",
-            dominant_orisha.name()
+            dominant_domain.universal_name()
         ),
     }
 }

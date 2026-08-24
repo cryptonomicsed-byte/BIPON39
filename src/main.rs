@@ -10,7 +10,7 @@ use bipon39::{
     name = "bipon39",
     version,
     about = "BIPỌ̀N39 mnemonic, dual-mode conversion, seed, and Ifáscript inspection tool",
-    after_long_help = "Examples:\n  bipon39 generate 256\n  bipon39 generate 128 --mode 2048\n  bipon39 inspect esu-elegbara esu-elegba sango\n  bipon39 convert --to-2048 esu-elegbara ...\n  bipon39 convert --to-256 esu-elegbara~alpha ...\n  bipon39 seed esu-elegbara ... --passphrase àṣẹ"
+    after_long_help = "Examples:\n  bipon39 generate 256\n  bipon39 generate 128 --mode 2048\n  bipon39 inspect esu-elegbara esu-elegba sango\n  bipon39 convert --to-2048 esu-elegbara ...\n  bipon39 convert --to-256 esu-elegbara~alpha ...\n  bipon39 seed esu-elegbara ... --passphrase agency"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -104,20 +104,20 @@ fn inspect(mnemonic: &str) -> Result<(), BiponError> {
     let profile = personality_profile(mnemonic)?;
     let elements = elemental_signature(mnemonic);
 
-    println!("Dominant Orisha: {}", profile.dominant_orisha.name());
+    println!("Dominant Domain: {}", profile.dominant_domain.universal_name());
     println!("Summary: {}", profile.personality_summary);
     println!(
         "Elements: Fire={} Water={} Earth={} Air={} Ether={}",
         elements.fire, elements.water, elements.earth, elements.air, elements.ether
     );
-    println!("Macro distribution:");
+    println!("Domain distribution:");
     for ((macro_, count), (_, pct)) in profile
         .macro_distribution
         .counts
         .into_iter()
         .zip(profile.macro_percentages)
     {
-        println!("  {}: {count} ({pct:.1}%)", macro_.name());
+        println!("  {}: {count} ({pct:.1}%)", macro_.universal_name());
     }
     println!("Ritual suggestions:");
     for cue in profile.ritual_suggestions {

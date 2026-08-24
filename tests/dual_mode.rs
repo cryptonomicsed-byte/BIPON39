@@ -58,10 +58,10 @@ fn ifascript_profile_accepts_2048_mode_tokens() {
     let profile = personality_profile("esu-elegbara~alpha esu-elegba~beta sango~theta").unwrap();
 
     assert_eq!(profile.macro_distribution.total, 3);
-    assert_eq!(profile.dominant_orisha, Macro::Esu);
+    assert_eq!(profile.dominant_domain, Macro::Esu);
     assert!((profile.macro_percentages[0].1 - (100.0 * 2.0 / 3.0)).abs() < 1e-10);
     assert_eq!(profile.ritual_suggestions[0], "draw crossroads");
-    assert!(profile.personality_summary.contains("ÈṢÙ leads"));
+    assert!(profile.personality_summary.contains("Access leads"));
     assert_eq!(
         profile.elemental_signature,
         ElementalVector {
